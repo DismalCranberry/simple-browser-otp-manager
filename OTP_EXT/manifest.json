@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "TOTP Generator",
+  "name": "OTP Manager",
   "version": "1.4",
-  "description": "Generate 6-digit TOTP codes from one or more shared secrets",
+  "description": "Generates 6-digit TOTP codes from one or more shared base32 codes",
   "permissions": [
     "storage"
   ],
