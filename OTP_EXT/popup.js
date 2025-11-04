@@ -1,5 +1,60 @@
+// Gradient helpers
+const GRADIENT_PALETTE = [
+    ["#ffecd2", "#fcb69f"], // peach
+    ["#a1c4fd", "#c2e9fb"], // light blue
+    ["#fddb92", "#d1fdff"], // sunny
+    ["#f6d365", "#fda085"], // light orange
+    ["#cfd9df", "#e2ebf0"], // silver-gray
+    ["#e0c3fc", "#8ec5fc"], // lavender-blue
+    ["#fbc2eb", "#a6c1ee"], // pinkish blue
+    ["#ff9a9e", "#fecfef"]  // rose
+];
+
+function getRandomGradient() {
+    const i = Math.floor(Math.random() * GRADIENT_PALETTE.length);
+    return GRADIENT_PALETTE[i];
+}
+
+function applyBtnCss(btn, colors) {
+    if (!btn) return;
+    const [c1, c2] = colors || getRandomGradient();
+    btn.style.cssText += `
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(90deg, ${c1}, ${c2});
+        color: #fff;
+        font: 600 12px/1 system-ui, sans-serif;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 3px 8px rgba(0,0,0,.25);
+        transition: transform .15s ease, filter .15s ease;
+    `;
+    btn.onmouseenter = () => {
+        if (!btn.disabled) {
+            btn.style.transform = "translateY(-1px)";
+            btn.style.filter = "brightness(1.06)";
+        }
+    };
+    btn.onmouseleave = () => {
+        btn.style.transform = "translateY(0)";
+        btn.style.filter = "none";
+    };
+    btn.onmousedown = () => {
+        if (!btn.disabled) btn.style.transform = "scale(0.97)";
+    };
+    btn.onmouseup = () => {
+        if (!btn.disabled) btn.style.transform = "translateY(-1px)";
+    };
+}
+
 // Base32 decode (unchanged)
 const BASE32_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
 function base32Decode(input) {
     let bits = 0, value = 0, output = [];
     input = input.replace(/=+$/, "").toUpperCase();
@@ -25,46 +80,29 @@ async function generateTOTP(secret) {
     view.setUint32(0, Math.floor(counter / 2 ** 32));
     view.setUint32(4, counter >>> 0);
 
-    const cryptoKey = await crypto.subtle.importKey(
-        "raw",
-        keyBytes,
-        { name: "HMAC", hash: "SHA-1" },
-        false,
-        ["sign"]
-    );
+    const cryptoKey = await crypto.subtle.importKey("raw", keyBytes, {name: "HMAC", hash: "SHA-1"}, false, ["sign"]);
     const hmac = await crypto.subtle.sign("HMAC", cryptoKey, buf);
     const hash = new Uint8Array(hmac);
     const offset = hash[hash.length - 1] & 0x0F;
-    const binary =
-        ((hash[offset] & 0x7F) << 24) |
-        ((hash[offset + 1] & 0xFF) << 16) |
-        ((hash[offset + 2] & 0xFF) << 8) |
-        (hash[offset + 3] & 0xFF);
+    const binary = ((hash[offset] & 0x7F) << 24) | ((hash[offset + 1] & 0xFF) << 16) | ((hash[offset + 2] & 0xFF) << 8) | (hash[offset + 3] & 0xFF);
     return (binary % 1_000_000).toString().padStart(6, "0");
 }
 
 // chrome.storage helpers
 function getSecrets() {
-    return new Promise(res =>
-        chrome.storage.local.get({ secrets: [] }, data => res(data.secrets))
-    );
+    return new Promise(res => chrome.storage.local.get({secrets: []}, data => res(data.secrets)));
 }
+
 function saveSecrets(secrets) {
-    return new Promise(res =>
-        chrome.storage.local.set({ secrets }, () => res())
-    );
+    return new Promise(res => chrome.storage.local.set({secrets}, () => res()));
 }
+
 function getAddCollapsed() {
-    return new Promise(res =>
-        chrome.storage.local.get({ addCollapsed: false }, data =>
-            res(data.addCollapsed)
-        )
-    );
+    return new Promise(res => chrome.storage.local.get({addCollapsed: false}, data => res(data.addCollapsed)));
 }
+
 function saveAddCollapsed(val) {
-    return new Promise(res =>
-        chrome.storage.local.set({ addCollapsed: val }, () => res())
-    );
+    return new Promise(res => chrome.storage.local.set({addCollapsed: val}, () => res()));
 }
 
 const addHeader = document.getElementById("add-header");
@@ -91,6 +129,10 @@ let dragSrcIndex = null;
     }
 })();
 
+if (addContainer) applyBtnCss(addHeader);
+const submitBtn = form?.querySelector('button[type="submit"]');
+if (submitBtn) applyBtnCss(submitBtn);
+
 // Toggle collapse/expand and persist
 addHeader.addEventListener("click", async () => {
     const hidden = addContainer.classList.toggle("hidden");
@@ -104,11 +146,17 @@ async function initUI() {
     entries = [];
     otpListEl.innerHTML = "";
 
-    secrets.forEach(({ label, secret }, idx) => {
+    secrets.forEach(({label, secret}, idx) => {
         const entryEl = document.createElement("div");
         entryEl.className = "otp-entry";
         entryEl.draggable = true;
         entryEl.dataset.index = idx;
+
+        const [c1, c2] = getRandomGradient();
+        entryEl.style.background = `linear-gradient(90deg, ${c1}, ${c2})`;
+        entryEl.style.color = "#000000"; // dark text
+        entryEl.style.boxShadow = "0 2px 4px rgba(0,0,0,.1)";
+        entryEl.style.border = "1px solid rgba(0,0,0,.05)";
 
         // DRAG & DROP EVENTS
         entryEl.addEventListener("dragstart", e => {
@@ -155,9 +203,7 @@ async function initUI() {
         renameBtn.title = "Rename this OTP";
         renameBtn.addEventListener("click", async e => {
             e.stopPropagation();
-            const wantRename = confirm(
-                `Are you sure you want to rename “${label}”?`
-            );
+            const wantRename = confirm(`Are you sure you want to rename “${label}”?`);
             if (!wantRename) return;
 
             const newLabel = prompt("Enter the new label:", label);
@@ -176,9 +222,7 @@ async function initUI() {
         deleteBtn.title = "Delete this OTP";
         deleteBtn.addEventListener("click", async e => {
             e.stopPropagation();
-            const wantDelete = confirm(
-                `Are you sure you want to delete “${label}”?`
-            );
+            const wantDelete = confirm(`Are you sure you want to delete “${label}”?`);
             if (!wantDelete) return;
 
             const all = await getSecrets();
@@ -193,7 +237,6 @@ async function initUI() {
             try {
                 await navigator.clipboard.writeText(code);
 
-                // ── change is here ──────────────────────────────────────────────────
                 // Instead of appending to entryEl, insert feedback inside the code span:
                 const fb = document.createElement("span");
                 fb.className = "copy-feedback";
@@ -203,26 +246,20 @@ async function initUI() {
                 setTimeout(() => {
                     fb.remove();
                 }, 1000);
-                // ────────────────────────────────────────────────────────────────────
-
             } catch (err) {
                 console.error("Copy failed", err);
             }
         });
 
-        // ─── ORDER OF ELEMENTS ─────────────────────────────────────────────────
-        // label | code (with inline feedback) | rename | delete
         entryEl.append(lbl, cd, renameBtn, deleteBtn);
         otpListEl.appendChild(entryEl);
-        entries.push({ secret, codeEl: cd });
+        entries.push({secret, codeEl: cd});
     });
 
     // Generate and display each code immediately
-    await Promise.all(
-        entries.map(async ({ secret, codeEl }) => {
-            codeEl.textContent = await generateTOTP(secret);
-        })
-    );
+    await Promise.all(entries.map(async ({secret, codeEl}) => {
+        codeEl.textContent = await generateTOTP(secret);
+    }));
 }
 
 // Refresh countdown & regenerate only on the 30s mark
@@ -231,7 +268,7 @@ async function tick() {
     const secs = now % 30;
     countdownEl.textContent = `${30 - secs}s until refresh`;
     if (secs === 0) {
-        for (const { secret, codeEl } of entries) {
+        for (const {secret, codeEl} of entries) {
             codeEl.textContent = await generateTOTP(secret);
         }
     }
@@ -245,7 +282,7 @@ form.addEventListener("submit", async e => {
     if (!label || !secret) return;
 
     const all = await getSecrets();
-    all.push({ label, secret });
+    all.push({label, secret});
     await saveSecrets(all);
 
     labelInput.value = "";

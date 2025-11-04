@@ -5,9 +5,10 @@
     <title>TOTP</title>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             width: 260px;
             padding: 12px;
+            background: #f5f5f5;
         }
 
         #add-header {
@@ -16,8 +17,9 @@
             gap: 6px;
             cursor: pointer;
             user-select: none;
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 6px;
+            /* JS will turn this into a gradient button */
         }
 
         .hidden {
@@ -28,16 +30,24 @@
             display: flex;
             flex-direction: column;
             margin-bottom: 12px;
+            gap: 4px;
         }
 
-        form input, form button {
-            margin: 4px 0;
-            padding: 6px;
+        form input {
+            padding: 6px 8px;
             font-size: 0.9em;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
         }
 
-        #sort-btn {
-            display: none; /* No longer needed */
+        /* the submit button will get JS gradient, but we keep a fallback */
+        form button[type="submit"] {
+            border: none;
+            padding: 7px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
         }
 
         #otp-list {
@@ -51,84 +61,93 @@
             grid-template-columns: auto 1fr auto auto;
             align-items: center;
             gap: 6px;
-            padding: 6px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 6px 7px;
+            border: 1px solid rgba(0, 0, 0, .04);
+            border-radius: 8px;
+            background-color: #fff;
             cursor: move;
-            background-color: #fafafa;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .03);
         }
 
         .otp-entry.drag-over {
-            border: 2px dashed #999;
+            outline: 2px dashed #764ba2;
         }
 
         .otp-label {
-            font-weight: bold;
+            font-weight: 500;
             user-select: none;
         }
 
         .otp-code {
-            font-family: monospace;
+            font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
             user-select: all;
+            position: relative;
         }
 
         .copy-feedback {
-            color: green;
-            font-size: 0.8em;
-            margin-left: 6px;
+            position: absolute;
+            top: -16px;
+            right: 0;
+            background: #222;
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 1px 4px;
+            border-radius: 4px;
         }
 
-        .rename-btn, .delete-btn {
+        /* tiny action buttons — JS can also make them gradient if you want */
+        .rename-btn,
+        .delete-btn {
             background: transparent;
             border: none;
-            font-size: 1em;
+            font-size: 0.9em;
             cursor: pointer;
             padding: 2px 4px;
         }
 
         .rename-btn {
-            color: #06c;
+            color: #333;
         }
 
         .delete-btn {
-            color: #c00;
+            color: #a00;
         }
 
         #countdown {
             margin-top: 12px;
-            font-size: 0.8em;
+            font-size: 0.75em;
             color: #666;
             text-align: center;
         }
     </style>
 </head>
 <body>
-    <div id="add-header">
-        <span id="toggle-icon">▼</span>
-        <span>Add OTP</span>
-    </div>
-    <div id="add-container">
-        <form id="add-form">
-            <label for="label-input" class="visually-hidden">Account name</label>
-            <input
+<div id="add-header">
+    <span id="toggle-icon">▼</span>
+    <span>Add OTP</span>
+</div>
+<div id="add-container">
+    <form id="add-form">
+        <label for="label-input" class="visually-hidden">Account name</label>
+        <input
                 type="text"
                 id="label-input"
                 placeholder="Label (e.g. Gmail)"
                 required
-            >
-            <label for="secret-input" class="visually-hidden">Base32 TOTP secret</label>
-            <input
+        >
+        <label for="secret-input" class="visually-hidden">Base32 TOTP secret</label>
+        <input
                 type="text"
                 id="secret-input"
                 placeholder="Base32 Secret"
                 required
-            >
-            <button type="submit">Add OTP</button>
-        </form>
-    </div>
+        >
+        <button type="submit">Add OTP</button>
+    </form>
+</div>
 
-    <div id="otp-list"></div>
-    <div id="countdown">--s until refresh</div>
-    <script src="popup.js"></script>
+<div id="otp-list"></div>
+<div id="countdown">--s until refresh</div>
+<script src="popup.js"></script>
 </body>
 </html>

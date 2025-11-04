@@ -1,24 +1,18 @@
 {
   "manifest_version": 3,
   "name": "OTP Manager",
-  "version": "1.4",
+  "version": "1.5",
   "description": "Generates 6-digit TOTP codes from one or more shared base32 codes",
   "permissions": [
     "storage"
   ],
   "icons": {
-    "16": "RandomCat.png",
-    "32": "RandomCat.png",
-    "48": "RandomCat.png",
     "128": "RandomCat.png"
   },
   "action": {
     "default_title": "TOTP",
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "RandomCat.png",
-      "32": "RandomCat.png",
-      "48": "RandomCat.png",
       "128": "RandomCat.png"
     }
   }
