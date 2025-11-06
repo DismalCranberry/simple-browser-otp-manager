@@ -153,10 +153,29 @@ async function initUI() {
         entryEl.dataset.index = idx;
 
         const [c1, c2] = getRandomGradient();
-        entryEl.style.background = `linear-gradient(90deg, ${c1}, ${c2})`;
-        entryEl.style.color = "#000000"; // dark text
-        entryEl.style.boxShadow = "0 2px 4px rgba(0,0,0,.1)";
-        entryEl.style.border = "1px solid rgba(0,0,0,.05)";
+        entryEl.style.cssText += `
+    border-radius: 10px;
+    background: linear-gradient(90deg, ${c1}, ${c2});
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(0,0,0,.25);
+    transition: transform .15s ease, filter .15s ease;
+`;
+        entryEl.onmouseenter = () => {
+            entryEl.style.transform = "translateY(-1px)";
+            entryEl.style.filter = "brightness(1.06)";
+        };
+        entryEl.onmouseleave = () => {
+            entryEl.style.transform = "translateY(0)";
+            entryEl.style.filter = "none";
+        };
+        entryEl.onmousedown = () => {
+            entryEl.style.transform = "scale(0.97)";
+        };
+        entryEl.onmouseup = () => {
+            entryEl.style.transform = "translateY(-1px)";
+        };
+
 
         // DRAG & DROP EVENTS
         entryEl.addEventListener("dragstart", e => {
@@ -250,7 +269,6 @@ async function initUI() {
                 console.error("Copy failed", err);
             }
         });
-
         entryEl.append(lbl, cd, renameBtn, deleteBtn);
         otpListEl.appendChild(entryEl);
         entries.push({secret, codeEl: cd});
