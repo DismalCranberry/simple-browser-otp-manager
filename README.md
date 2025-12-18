@@ -24,14 +24,7 @@ Together they let you:
 - **RandomCat.png**: Cute icon for the extension
 
 # Getting Started
-Clone the repository:
-
-```bash
-git clone <repo-url>
-```
 
 Load the **OTP_EXT** directory as an unpacked extension in Chrome. Open the popup, add your Base32 secrets, and start generating TOTPs.
 
 Enjoy convenient two-factor codes! 🚀
-
-**Disclaimer:** We cannot be held responsible for any damage or malfunction this software may cause to your system. Use at your own risk.
